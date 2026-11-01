@@ -228,7 +228,15 @@ function AuthPage() {
       if (error) throw error;
       // Supabase redirects the browser to Google and back to /auth.
       return;
-    } catch {
+    } catch (err: unknown) {
+      // Never fail silently: a disabled provider used to look like a dead
+      // button. Tell the visitor plainly and point at the email form.
+      const raw = err instanceof Error ? err.message : "";
+      toast.error(
+        /provider|not enabled|not configured/i.test(raw)
+          ? "Google sign-in isn't switched on yet. Please sign in with your email below — or create an account first."
+          : raw || "Google sign-in failed. Please try email instead.",
+      );
       setLoading(false);
     }
   };
@@ -403,14 +411,18 @@ function AuthPage() {
           </form>
 
           <div className="mt-4 space-y-2 text-center">
-            <button
-              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-              className="w-full text-xs text-muted-foreground hover:text-foreground"
-            >
-              {mode === "signin"
-                ? "New to NORDEVA? Create an account"
-                : "Already have an account? Sign in"}
-            </button>
+            {(mode === "signin" || mode === "signup") && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+                className="w-full"
+              >
+                {mode === "signin"
+                  ? "New to NORDEVA? Create an account"
+                  : "Already have an account? Sign in"}
+              </Button>
+            )}
             {mode === "signin" && (
               <button
                 onClick={() => setMode("forgot")}
