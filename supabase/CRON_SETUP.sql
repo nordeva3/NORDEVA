@@ -1,0 +1,24 @@
+-- Run only after deployment. Replace values with your deployed server URL and
+-- store the worker secret in Supabase Vault. Never commit the real secret.
+-- Supabase Cron can invoke HTTP endpoints using pg_net.
+--
+-- select vault.create_secret('https://YOUR-PRODUCTION-DOMAIN', 'velora_app_url');
+-- select vault.create_secret('YOUR-WORKER-SECRET', 'velora_worker_secret');
+--
+-- select cron.schedule(
+--   'lume-email-worker', '*/1 * * * *',
+--   $$select net.http_post(
+--     url := (select decrypted_secret from vault.decrypted_secrets where name='velora_app_url') || '/api/worker/email',
+--     headers := jsonb_build_object('content-type','application/json','x-worker-secret',(select decrypted_secret from vault.decrypted_secrets where name='velora_worker_secret')),
+--     body := '{}'::jsonb
+--   );$$
+-- );
+--
+-- select cron.schedule(
+--   'lume-malware-worker', '*/2 * * * *',
+--   $$select net.http_post(
+--     url := (select decrypted_secret from vault.decrypted_secrets where name='velora_app_url') || '/api/worker/malware',
+--     headers := jsonb_build_object('content-type','application/json','x-worker-secret',(select decrypted_secret from vault.decrypted_secrets where name='velora_worker_secret')),
+--     body := '{}'::jsonb
+--   );$$
+-- );

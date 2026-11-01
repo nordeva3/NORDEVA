@@ -1,0 +1,921 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* NORDEVA — warm editorial marketplace, restrained violet accent */
+
+@theme inline {
+  --font-display: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --radius-sm: calc(var(--radius) - 12px);
+  --radius-md: calc(var(--radius) - 8px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 8px);
+  --radius-2xl: calc(var(--radius) + 12px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  /* Additive tokens (TITANIUM wave T1): status colours, the third text
+     level (faint — large/decorative text only), an explicit hover surface
+     and a strong border. Defined per preset/base below. */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-faint: var(--faint);
+  --color-surface-hover: var(--surface-hover);
+  --color-border-strong: var(--border-strong);
+  --color-accent-hover: var(--accent-hover);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-lume: var(--lume);
+  --color-lume-glow: var(--lume-glow);
+  --color-gold: var(--gold);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-shimmer: shimmer 2.4s linear infinite;
+  --animate-rise: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-fade: fade 0.5s ease both;
+  --animate-drift: drift 26s linear infinite;
+  --animate-pulse-soft: pulse-soft 3.5s ease-in-out infinite;
+}
+
+/* Semantic theme tokens: the same components are rendered with independently tuned light/dark palettes. */
+:root {
+  color-scheme: light;
+  --radius: 1rem;
+  --background: oklch(0.975 0.008 190);
+  --foreground: oklch(0.22 0.025 220);
+  --card: oklch(0.995 0.003 190);
+  --card-foreground: oklch(0.22 0.025 220);
+  --popover: oklch(0.995 0.003 190);
+  --popover-foreground: oklch(0.22 0.025 220);
+  --primary: oklch(0.48 0.105 190);
+  --primary-foreground: oklch(0.99 0.003 190);
+  --secondary: oklch(0.935 0.014 190);
+  --secondary-foreground: oklch(0.25 0.03 220);
+  --muted: oklch(0.945 0.009 200);
+  --muted-foreground: oklch(0.48 0.025 220);
+  --accent: oklch(0.91 0.045 190);
+  --accent-foreground: oklch(0.25 0.055 205);
+  --destructive: oklch(0.58 0.21 25);
+  --destructive-foreground: oklch(0.99 0 0);
+  /* Additive token defaults (wave T1) so the new utilities resolve under
+     every preset; TITANIUM overrides them with the spec hexes. Chained
+     aliases resolve against the same element, following the theme. */
+  --success: oklch(0.6 0.14 158);
+  --warning: oklch(0.68 0.13 70);
+  --faint: var(--muted-foreground);
+  --surface-hover: var(--accent);
+  --border-strong: var(--input);
+  --accent-hover: var(--primary);
+  --border: oklch(0.3 0.025 220 / 14%);
+  --input: oklch(0.3 0.025 220 / 18%);
+  --ring: oklch(0.56 0.12 190);
+  --lume: oklch(0.43 0.105 190);
+  --lume-glow: oklch(0.62 0.105 185);
+  --gold: oklch(0.78 0.14 82);
+  /* Sidebar tokens (redesign wave R6): aliases of the base palette so the
+     dashboard/admin sidebars follow every appearance preset automatically. */
+  --sidebar: var(--card);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+  --shadow-soft: 0 1px 0 oklch(1 0 0 / 85%) inset, 0 10px 26px -24px oklch(0.2 0.03 220 / 25%);
+  --shadow-lift: 0 1px 0 oklch(1 0 0 / 85%) inset, 0 18px 32px -24px oklch(0.2 0.03 220 / 24%);
+  --shadow-glow: 0 6px 18px -12px oklch(0.43 0.105 190 / 35%);
+}
+
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.17 0.018 225);
+  --foreground: oklch(0.94 0.008 195);
+  --card: oklch(0.215 0.022 225);
+  --card-foreground: oklch(0.94 0.008 195);
+  --popover: oklch(0.225 0.023 225);
+  --popover-foreground: oklch(0.94 0.008 195);
+  --primary: oklch(0.72 0.11 185);
+  --primary-foreground: oklch(0.17 0.025 225);
+  --secondary: oklch(0.265 0.022 225);
+  --secondary-foreground: oklch(0.9 0.012 195);
+  --muted: oklch(0.255 0.018 225);
+  --muted-foreground: oklch(0.72 0.018 205);
+  --accent: oklch(0.3 0.055 195);
+  --accent-foreground: oklch(0.91 0.04 185);
+  --destructive: oklch(0.68 0.18 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --success: oklch(0.72 0.14 158);
+  --warning: oklch(0.78 0.12 75);
+  --border: oklch(0.78 0.02 200 / 16%);
+  --input: oklch(0.78 0.02 200 / 20%);
+  --ring: oklch(0.72 0.11 185);
+  --lume: oklch(0.75 0.105 185);
+  --lume-glow: oklch(0.78 0.09 185);
+  --gold: oklch(0.83 0.13 82);
+  --shadow-soft: 0 1px 0 oklch(1 0 0 / 4%) inset, 0 12px 28px -24px oklch(0 0 0 / 55%);
+  --shadow-lift: 0 1px 0 oklch(1 0 0 / 5%) inset, 0 18px 32px -24px oklch(0 0 0 / 65%);
+  --shadow-glow: 0 6px 20px -12px oklch(0.72 0.11 185 / 32%);
+}
+
+.light {
+  color-scheme: light;
+}
+
+/* Appearance layout hooks: consumed by marketplace surfaces from redesign
+   wave R3 onward. Defaults match the current layout exactly. */
+:root {
+  --content-width: 80rem;
+  --card-gap: 1.5rem;
+  /* Motion scale (TITANIUM wave T4): the Reveal entrance and the `lift`
+     hover run on these variables. Defaults preserve the feel every other
+     preset shipped with (700ms reveal / 400ms lift); TITANIUM caps both
+     at 240ms per its spec §10 (≤260ms for larger overlays). */
+  --reveal-duration: 700ms;
+  --lift-duration: 400ms;
+}
+:root[data-width="wide"] {
+  --content-width: 96rem;
+}
+:root[data-density="compact"] {
+  --card-gap: 1rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Appearance presets (redesign wave R1). The admin-selected preset is */
+/* applied via <html data-preset="…">; see src/lib/appearance.ts.      */
+/* "premium-dark" deliberately has NO overrides — it is the base       */
+/* palette above, so the default site renders pixel-identically until  */
+/* an admin chooses another preset. Each other preset overrides a      */
+/* focused token subset (accent, radius, surface tint, display font).  */
+/* ------------------------------------------------------------------ */
+
+/* Classic Marketplace — bright neutral surfaces, confident blue accent. */
+:root[data-preset="classic-marketplace"] {
+  --radius: 0.75rem;
+  --background: oklch(0.98 0.004 230);
+  --foreground: oklch(0.22 0.02 240);
+  --card: oklch(0.995 0.002 230);
+  --card-foreground: oklch(0.22 0.02 240);
+  --popover: oklch(0.995 0.002 230);
+  --popover-foreground: oklch(0.22 0.02 240);
+  --primary: oklch(0.52 0.14 255);
+  --primary-foreground: oklch(0.99 0.002 230);
+  --secondary: oklch(0.945 0.008 230);
+  --secondary-foreground: oklch(0.24 0.02 240);
+  --muted: oklch(0.955 0.006 230);
+  --muted-foreground: oklch(0.47 0.02 240);
+  --accent: oklch(0.93 0.03 250);
+  --accent-foreground: oklch(0.32 0.08 255);
+  --ring: oklch(0.6 0.13 255);
+  --lume: oklch(0.5 0.13 255);
+  --lume-glow: oklch(0.65 0.12 250);
+  --shadow-soft: 0 1px 0 oklch(1 0 0 / 85%) inset, 0 10px 26px -24px oklch(0.2 0.03 240 / 25%);
+  --shadow-lift: 0 1px 0 oklch(1 0 0 / 85%) inset, 0 18px 32px -24px oklch(0.2 0.03 240 / 24%);
+  --shadow-glow: 0 6px 18px -12px oklch(0.5 0.13 255 / 35%);
+}
+.dark[data-preset="classic-marketplace"] {
+  --background: oklch(0.18 0.015 240);
+  --foreground: oklch(0.94 0.006 230);
+  --card: oklch(0.225 0.018 240);
+  --card-foreground: oklch(0.94 0.006 230);
+  --popover: oklch(0.235 0.019 240);
+  --popover-foreground: oklch(0.94 0.006 230);
+  --primary: oklch(0.7 0.12 250);
+  --primary-foreground: oklch(0.16 0.02 240);
+  --secondary: oklch(0.27 0.018 240);
+  --secondary-foreground: oklch(0.9 0.01 230);
+  --muted: oklch(0.26 0.014 240);
+  --muted-foreground: oklch(0.72 0.014 235);
+  --accent: oklch(0.3 0.05 250);
+  --accent-foreground: oklch(0.9 0.04 250);
+  --ring: oklch(0.7 0.12 250);
+  --lume: oklch(0.72 0.11 250);
+  --lume-glow: oklch(0.76 0.09 250);
+  --shadow-glow: 0 6px 20px -12px oklch(0.7 0.12 250 / 32%);
+}
+
+/* Modern Minimal — near-monochrome surfaces, tight radius, one indigo accent. */
+:root[data-preset="modern-minimal"] {
+  --radius: 0.5rem;
+  --background: oklch(0.985 0.002 250);
+  --foreground: oklch(0.2 0.005 250);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.005 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.005 250);
+  --primary: oklch(0.5 0.16 262);
+  --primary-foreground: oklch(0.99 0.002 250);
+  --secondary: oklch(0.95 0.003 250);
+  --secondary-foreground: oklch(0.24 0.006 250);
+  --muted: oklch(0.96 0.002 250);
+  --muted-foreground: oklch(0.47 0.008 250);
+  --accent: oklch(0.94 0.015 262);
+  --accent-foreground: oklch(0.3 0.06 262);
+  --ring: oklch(0.58 0.15 262);
+  --lume: oklch(0.48 0.15 262);
+  --lume-glow: oklch(0.62 0.13 262);
+  --shadow-soft: 0 10px 24px -24px oklch(0.2 0.005 250 / 18%);
+  --shadow-lift: 0 16px 30px -24px oklch(0.2 0.005 250 / 18%);
+  --shadow-glow: 0 6px 18px -12px oklch(0.48 0.15 262 / 30%);
+}
+.dark[data-preset="modern-minimal"] {
+  --background: oklch(0.16 0.004 250);
+  --foreground: oklch(0.94 0.004 250);
+  --card: oklch(0.2 0.005 250);
+  --card-foreground: oklch(0.94 0.004 250);
+  --popover: oklch(0.21 0.005 250);
+  --popover-foreground: oklch(0.94 0.004 250);
+  --primary: oklch(0.72 0.13 262);
+  --primary-foreground: oklch(0.15 0.01 250);
+  --secondary: oklch(0.25 0.005 250);
+  --secondary-foreground: oklch(0.9 0.005 250);
+  --muted: oklch(0.24 0.004 250);
+  --muted-foreground: oklch(0.72 0.006 250);
+  --accent: oklch(0.28 0.04 262);
+  --accent-foreground: oklch(0.9 0.03 262);
+  --ring: oklch(0.72 0.13 262);
+  --lume: oklch(0.74 0.12 262);
+  --lume-glow: oklch(0.77 0.1 262);
+  --shadow-soft: 0 12px 26px -24px oklch(0 0 0 / 45%);
+  --shadow-lift: 0 18px 30px -24px oklch(0 0 0 / 55%);
+  --shadow-glow: 0 6px 20px -12px oklch(0.72 0.13 262 / 28%);
+}
+
+/* Editorial Commerce — warm paper surfaces, clay accent, serif display type. */
+:root[data-preset="editorial-commerce"] {
+  --radius: 0.625rem;
+  --font-display: "Fraunces", "Sora", Georgia, serif;
+  --background: oklch(0.965 0.018 78);
+  --foreground: oklch(0.23 0.02 55);
+  --card: oklch(0.985 0.012 80);
+  --card-foreground: oklch(0.23 0.02 55);
+  --popover: oklch(0.985 0.012 80);
+  --popover-foreground: oklch(0.23 0.02 55);
+  --primary: oklch(0.5 0.13 38);
+  --primary-foreground: oklch(0.98 0.01 80);
+  --secondary: oklch(0.93 0.02 75);
+  --secondary-foreground: oklch(0.27 0.025 55);
+  --muted: oklch(0.94 0.015 75);
+  --muted-foreground: oklch(0.47 0.025 55);
+  --accent: oklch(0.9 0.04 60);
+  --accent-foreground: oklch(0.3 0.06 40);
+  --border: oklch(0.3 0.03 60 / 16%);
+  --input: oklch(0.3 0.03 60 / 20%);
+  --ring: oklch(0.58 0.12 38);
+  --lume: oklch(0.47 0.12 38);
+  --lume-glow: oklch(0.62 0.11 45);
+  --shadow-soft: 0 1px 0 oklch(1 0 0 / 70%) inset, 0 10px 26px -24px oklch(0.25 0.04 50 / 25%);
+  --shadow-lift: 0 1px 0 oklch(1 0 0 / 70%) inset, 0 18px 32px -24px oklch(0.25 0.04 50 / 24%);
+  --shadow-glow: 0 6px 18px -12px oklch(0.47 0.12 38 / 35%);
+}
+.dark[data-preset="editorial-commerce"] {
+  --background: oklch(0.18 0.015 60);
+  --foreground: oklch(0.93 0.01 75);
+  --card: oklch(0.225 0.018 60);
+  --card-foreground: oklch(0.93 0.01 75);
+  --popover: oklch(0.235 0.019 60);
+  --popover-foreground: oklch(0.93 0.01 75);
+  --primary: oklch(0.72 0.11 42);
+  --primary-foreground: oklch(0.18 0.02 60);
+  --secondary: oklch(0.265 0.015 60);
+  --secondary-foreground: oklch(0.9 0.01 75);
+  --muted: oklch(0.255 0.012 60);
+  --muted-foreground: oklch(0.72 0.015 70);
+  --accent: oklch(0.3 0.05 45);
+  --accent-foreground: oklch(0.9 0.04 50);
+  --border: oklch(0.8 0.025 70 / 16%);
+  --input: oklch(0.8 0.025 70 / 20%);
+  --ring: oklch(0.72 0.11 42);
+  --lume: oklch(0.74 0.1 42);
+  --lume-glow: oklch(0.77 0.09 45);
+  --shadow-glow: 0 6px 20px -12px oklch(0.72 0.11 42 / 32%);
+}
+/* Serif display type for the editorial preset. These rules are unlayered so
+   they win over the base heading rule regardless of theme-variable output. */
+:root[data-preset="editorial-commerce"] h1,
+:root[data-preset="editorial-commerce"] h2,
+:root[data-preset="editorial-commerce"] h3,
+:root[data-preset="editorial-commerce"] .font-display {
+  font-family: "Fraunces", "Sora", Georgia, serif;
+  letter-spacing: -0.01em;
+}
+
+/* Professional Neutral — grey-neutral surfaces, blue-grey accent, square feel. */
+:root[data-preset="professional-neutral"] {
+  --radius: 0.375rem;
+  --background: oklch(0.98 0.003 240);
+  --foreground: oklch(0.21 0.01 240);
+  --card: oklch(0.995 0.001 240);
+  --card-foreground: oklch(0.21 0.01 240);
+  --popover: oklch(0.995 0.001 240);
+  --popover-foreground: oklch(0.21 0.01 240);
+  --primary: oklch(0.5 0.07 232);
+  --primary-foreground: oklch(0.99 0.002 240);
+  --secondary: oklch(0.94 0.005 240);
+  --secondary-foreground: oklch(0.25 0.012 240);
+  --muted: oklch(0.95 0.004 240);
+  --muted-foreground: oklch(0.46 0.012 240);
+  --accent: oklch(0.92 0.012 232);
+  --accent-foreground: oklch(0.28 0.03 232);
+  --ring: oklch(0.58 0.07 232);
+  --lume: oklch(0.48 0.065 232);
+  --lume-glow: oklch(0.62 0.06 232);
+  --shadow-glow: 0 6px 18px -12px oklch(0.48 0.065 232 / 32%);
+}
+.dark[data-preset="professional-neutral"] {
+  --background: oklch(0.17 0.006 240);
+  --foreground: oklch(0.93 0.004 240);
+  --card: oklch(0.215 0.008 240);
+  --card-foreground: oklch(0.93 0.004 240);
+  --popover: oklch(0.225 0.008 240);
+  --popover-foreground: oklch(0.93 0.004 240);
+  --primary: oklch(0.7 0.06 232);
+  --primary-foreground: oklch(0.16 0.01 240);
+  --secondary: oklch(0.26 0.008 240);
+  --secondary-foreground: oklch(0.9 0.005 240);
+  --muted: oklch(0.25 0.006 240);
+  --muted-foreground: oklch(0.71 0.008 240);
+  --accent: oklch(0.29 0.02 232);
+  --accent-foreground: oklch(0.9 0.015 232);
+  --ring: oklch(0.7 0.06 232);
+  --lume: oklch(0.72 0.055 232);
+  --lume-glow: oklch(0.75 0.05 232);
+  --shadow-glow: 0 6px 20px -12px oklch(0.7 0.06 232 / 30%);
+}
+
+/* TITANIUM — graphite/silver premium minimalism (design-system wave T1).
+   The spec hexes are carried verbatim. Mapping notes (see TITANIUM_AUDIT.md
+   §1): spec --surface → --card; --surface-elevated → --popover/--secondary/
+   --muted; --surface-hover → the shadcn hover-surface token --accent plus
+   the explicit --surface-hover; --border-strong → --input plus the explicit
+   --border-strong; spec --accent → --primary/--lume/--ring; spec
+   text-secondary → --muted-foreground (passes WCAG AA) while text-muted
+   lives only in --faint, reserved for large/decorative text, timestamps
+   and placeholders — never essential small print. --gold becomes the
+   Titanium Metallic mid-tone so the Premium hierarchy survives in greys. */
+:root[data-preset="titanium"] {
+  --radius: 0.5rem;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --background: #f5f6f8;
+  --foreground: #171a20;
+  --card: #ffffff;
+  --card-foreground: #171a20;
+  --popover: #f0f2f5;
+  --popover-foreground: #171a20;
+  --primary: #505d70;
+  --primary-foreground: #ffffff;
+  --secondary: #f0f2f5;
+  --secondary-foreground: #171a20;
+  --muted: #f0f2f5;
+  --muted-foreground: #626b78;
+  --accent: #e9edf2;
+  --accent-foreground: #171a20;
+  --accent-hover: #354253;
+  --surface-hover: #e9edf2;
+  --destructive: #c44444;
+  --destructive-foreground: #ffffff;
+  --success: #16865d;
+  --warning: #a66a13;
+  --faint: #929aa5;
+  --border: #e3e6eb;
+  --input: #cbd1d9;
+  --border-strong: #cbd1d9;
+  --ring: #505d70;
+  --lume: #505d70;
+  --lume-glow: #354253;
+  --gold: #626b78;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #171a20;
+  --sidebar-primary: #505d70;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e9edf2;
+  --sidebar-accent-foreground: #171a20;
+  --sidebar-border: #e3e6eb;
+  --sidebar-ring: #505d70;
+  --shadow-soft: 0 1px 2px rgb(23 26 32 / 6%), 0 10px 24px -24px rgb(23 26 32 / 18%);
+  --shadow-lift: 0 2px 4px rgb(23 26 32 / 6%), 0 16px 30px -24px rgb(23 26 32 / 22%);
+  --shadow-glow: 0 6px 18px -12px rgb(80 93 112 / 25%);
+  /* Decorative ambient loops are off under TITANIUM (spec §9/§10):
+     the animate utilities resolve these variables at the element. */
+  --animate-float: none;
+  --animate-drift: none;
+  /* Motion cap (spec §10): reveal + lift settle in 240ms under TITANIUM,
+     inside the 200–260ms overlay band. Set here (light block) so it
+     applies to the dark TITANIUM palette too. */
+  --reveal-duration: 240ms;
+  --lift-duration: 240ms;
+}
+.dark[data-preset="titanium"] {
+  --background: #0b0d10;
+  --foreground: #d9dee7;
+  --card: #15191f;
+  --card-foreground: #d9dee7;
+  --popover: #1c222a;
+  --popover-foreground: #d9dee7;
+  --primary: #aeb9c8;
+  --primary-foreground: #0b0d10;
+  --secondary: #1c222a;
+  --secondary-foreground: #d9dee7;
+  --muted: #1c222a;
+  --muted-foreground: #929ba8;
+  --accent: #232a33;
+  --accent-foreground: #d9dee7;
+  --accent-hover: #d0d7e0;
+  --surface-hover: #232a33;
+  --destructive: #e47777;
+  --destructive-foreground: #0b0d10;
+  --success: #35b987;
+  --warning: #e6b566;
+  --faint: #68717e;
+  --border: #292f38;
+  --input: #39414d;
+  --border-strong: #39414d;
+  --ring: #aeb9c8;
+  --lume: #aeb9c8;
+  --lume-glow: #d0d7e0;
+  --gold: #8994a3;
+  --sidebar: #101318;
+  --sidebar-foreground: #d9dee7;
+  --sidebar-primary: #aeb9c8;
+  --sidebar-primary-foreground: #0b0d10;
+  --sidebar-accent: #232a33;
+  --sidebar-accent-foreground: #d9dee7;
+  --sidebar-border: #292f38;
+  --sidebar-ring: #aeb9c8;
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 30%), 0 12px 26px -24px rgb(0 0 0 / 55%);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 35%), 0 18px 32px -24px rgb(0 0 0 / 65%);
+  --shadow-glow: 0 6px 18px -12px rgb(174 185 200 / 22%);
+}
+/* Inter is the display face under TITANIUM, weights capped at 600 (spec §4:
+   avoid excessive bold). Unlayered, following the editorial preset's
+   pattern, so the rule wins over the base heading rule. */
+:root[data-preset="titanium"] h1,
+:root[data-preset="titanium"] h2,
+:root[data-preset="titanium"] h3,
+:root[data-preset="titanium"] .font-display {
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+/* Spec-exact primary hover: TITANIUM buttons step to --accent-hover
+   instead of the default bg-primary/90 opacity step. Unlayered so it wins
+   over the layered Tailwind utility. */
+:root[data-preset="titanium"] .hover\:bg-primary\/90:hover {
+  background-color: var(--accent-hover);
+}
+/* The 3D spin loop does not resolve through a theme variable; stop it
+   explicitly under TITANIUM. */
+:root[data-preset="titanium"] .animate-float,
+:root[data-preset="titanium"] .animate-drift,
+:root[data-preset="titanium"] .spin-slow {
+  animation: none;
+}
+/* Named TITANIUM gradients — decorative accents only (logo mark, hero
+   rule, promo banner edge), never card backgrounds. They exist only while
+   the TITANIUM preset is active. */
+[data-preset="titanium"] .titanium-metallic {
+  background-image: linear-gradient(135deg, #242a33, #8994a3 50%, #353b45);
+}
+[data-preset="titanium"] .graphite-depth {
+  background-image: linear-gradient(160deg, #0b0d10, #242a33 55%, #101318);
+}
+[data-preset="titanium"] .silver-mist {
+  background-image: linear-gradient(135deg, #e8ebef, #ffffff 50%, #cbd2db);
+}
+
+/* Optional admin accent-hue override: rotates the accent family of whichever
+   preset is active while keeping that preset's surfaces. Placed after the
+   preset blocks so it wins at equal specificity; --accent-hue is set (or
+   removed) by applyAppearance in src/lib/appearance.ts. Scoped OUT under
+   TITANIUM: its identity is strictly monochrome, so a saved hue must never
+   rotate the silver accent into a colour. */
+:root[data-accent-hue]:not([data-preset="titanium"]) {
+  --primary: oklch(0.48 0.105 var(--accent-hue));
+  --ring: oklch(0.56 0.12 var(--accent-hue));
+  --lume: oklch(0.43 0.105 var(--accent-hue));
+  --lume-glow: oklch(0.62 0.105 var(--accent-hue));
+  --accent: oklch(0.91 0.045 var(--accent-hue));
+  --accent-foreground: oklch(0.25 0.055 var(--accent-hue));
+  --shadow-glow: 0 6px 18px -12px oklch(0.43 0.105 var(--accent-hue) / 35%);
+}
+.dark[data-accent-hue]:not([data-preset="titanium"]) {
+  --primary: oklch(0.72 0.11 var(--accent-hue));
+  --ring: oklch(0.72 0.11 var(--accent-hue));
+  --lume: oklch(0.75 0.105 var(--accent-hue));
+  --lume-glow: oklch(0.78 0.09 var(--accent-hue));
+  --accent: oklch(0.3 0.055 var(--accent-hue));
+  --accent-foreground: oklch(0.91 0.04 var(--accent-hue));
+  --shadow-glow: 0 6px 20px -12px oklch(0.72 0.11 var(--accent-hue) / 32%);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    background-image: none;
+    background-attachment: scroll;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--lume) 25%, transparent);
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--foreground) 22%, transparent);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--lume) 48%, transparent);
+    background-clip: content-box;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-70px, -45px, 0);
+  }
+}
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@utility lume-gradient {
+  background: var(--lume);
+}
+
+@utility lume-text {
+  color: var(--lume);
+}
+
+@utility glass-panel {
+  background: var(--card);
+  backdrop-filter: none;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
+}
+
+@utility surface {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+@utility lift {
+  transition:
+    transform var(--lift-duration) cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow var(--lift-duration) ease,
+    border-color var(--lift-duration) ease;
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lift);
+    border-color: color-mix(in oklab, var(--lume) 45%, transparent);
+  }
+}
+
+@utility glow-btn {
+  position: relative;
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.25s ease,
+    filter 0.25s ease;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+    filter: brightness(1.07);
+  }
+  &:active {
+    transform: translateY(0) scale(0.985);
+  }
+}
+
+@utility skeleton {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--muted) 90%, transparent) 25%,
+    color-mix(in oklab, var(--accent) 70%, transparent) 37%,
+    color-mix(in oklab, var(--muted) 90%, transparent) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.8s linear infinite;
+  border-radius: var(--radius-md);
+}
+
+@utility starfield {
+  background-image:
+    radial-gradient(1.2px 1.2px at 20% 30%, oklch(1 0 0 / 55%), transparent),
+    radial-gradient(1px 1px at 70% 20%, oklch(1 0 0 / 40%), transparent),
+    radial-gradient(
+      1.4px 1.4px at 40% 70%,
+      color-mix(in oklab, var(--lume) 70%, transparent),
+      transparent
+    ),
+    radial-gradient(1px 1px at 85% 60%, oklch(1 0 0 / 35%), transparent),
+    radial-gradient(
+      1.2px 1.2px at 10% 80%,
+      color-mix(in oklab, var(--lume) 65%, transparent),
+      transparent
+    ),
+    radial-gradient(1px 1px at 55% 45%, oklch(1 0 0 / 30%), transparent);
+  background-size: 520px 520px;
+}
+
+@keyframes spin-slow-3d {
+  from {
+    transform: rotateX(0deg) rotateY(0deg);
+  }
+  to {
+    transform: rotateX(360deg) rotateY(360deg);
+  }
+}
+.spin-slow {
+  animation: spin-slow-3d 34s linear infinite;
+}
+
+@utility depth-card {
+  position: relative;
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(165deg, oklch(1 0 0 / 5%), transparent 42%),
+    color-mix(in oklab, var(--card) 84%, transparent);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(16px) saturate(140%);
+}
+
+@utility reflect {
+  &::after {
+    content: "";
+    position: absolute;
+    inset: auto 8% -14% 8%;
+    height: 40px;
+    border-radius: 50%;
+    background: radial-gradient(
+      ellipse at center,
+      color-mix(in oklab, var(--lume) 22%, transparent),
+      transparent 70%
+    );
+    filter: blur(14px);
+    opacity: 0;
+    transition: opacity 0.45s ease;
+    pointer-events: none;
+  }
+  &:hover::after {
+    opacity: 1;
+  }
+}
+
+@utility focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--lume);
+    outline-offset: 2px;
+    border-radius: var(--radius-md);
+  }
+}
+
+/* Editorial product surfaces: quiet borders, restrained transitions, no synthetic glow. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Marketplace discovery: restrained editorial finish, designed for real catalog content. */
+.people-hero {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(
+      ellipse at 92% 5%,
+      color-mix(in oklab, var(--lume) 10%, transparent),
+      transparent 36%
+    ),
+    var(--card);
+}
+.people-hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  right: -5rem;
+  bottom: -7rem;
+  width: 18rem;
+  height: 18rem;
+  border: 1px solid color-mix(in oklab, var(--lume) 14%, transparent);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 2.5rem color-mix(in oklab, var(--lume) 3%, transparent),
+    0 0 0 5rem color-mix(in oklab, var(--lume) 2%, transparent);
+  pointer-events: none;
+}
+.people-profile-card {
+  box-shadow:
+    0 1px 0 color-mix(in oklab, white 45%, transparent) inset,
+    0 8px 24px -24px color-mix(in oklab, var(--foreground) 30%, transparent);
+}
+.people-profile-card:focus-within {
+  outline: 2px solid color-mix(in oklab, var(--lume) 65%, transparent);
+  outline-offset: 3px;
+}
+
+/* Shared polish and theme-safe controls. */
+html {
+  background: var(--background);
+}
+body,
+header,
+main,
+section,
+article,
+aside,
+footer,
+input,
+textarea,
+select,
+button {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 140ms;
+  transition-timing-function: ease-out;
+}
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+::placeholder {
+  color: var(--muted-foreground);
+  opacity: 0.82;
+}
+@media (prefers-reduced-motion: reduce) {
+  body,
+  header,
+  main,
+  section,
+  article,
+  aside,
+  footer,
+  input,
+  textarea,
+  select,
+  button {
+    transition-duration: 0ms;
+  }
+}
+
+/* Native controls and browser chrome follow the same active theme. */
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+html.light {
+  color-scheme: light;
+}
+input,
+textarea,
+select {
+  accent-color: var(--lume);
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Per-user appearance preferences (TITANIUM wave T2). Applied via     */
+/* data attributes / inline style on <html> from src/lib/preferences.ts */
+/* (and mirrored in the __root.tsx bootstrap to avoid a flash). These  */
+/* rules intentionally sit after every preset block so an explicit     */
+/* user choice wins over the preset; "default" choices set no          */
+/* attribute at all, leaving the preset values untouched.              */
+/* ------------------------------------------------------------------ */
+
+/* Corner radius preference: the radius scale in @theme derives from
+   --radius (radius-lg is var(--radius), sm/md/xl are calc offsets), so
+   overriding the one token restyles every rounded utility. */
+:root[data-user-radius="sharp"] {
+  --radius: 0.25rem;
+}
+:root[data-user-radius="round"] {
+  --radius: 0.875rem;
+}
+
+/* Manual reduced-motion preference: duplicates the global
+   prefers-reduced-motion block above. The OS media query keeps applying
+   on its own — this attribute can only add reduction, never remove it. */
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Compact density (shared data-density hook with the admin gridDensity):
+   --card-gap already tightens under [data-density="compact"] above; this
+   additionally tightens the dashboard/admin sidebar menu items. The
+   collapsed icon rail keeps its fixed padding (an !important rule in the
+   sidebar component wins over this). */
+:root[data-density="compact"] [data-sidebar="menu-button"] {
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+}
