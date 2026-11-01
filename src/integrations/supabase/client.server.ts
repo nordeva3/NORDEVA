@@ -32,9 +32,29 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
   };
 }
 
+function cleanEnv(value: string | undefined): string | undefined {
+  const cleaned = value?.trim();
+  return cleaned ? cleaned : undefined;
+}
+
+function validUrl(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "http:" || parsed.protocol === "https:" ? value : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function createSupabaseAdminClient() {
-  const SUPABASE_URL = process.env.SUPABASE_URL;
-  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  // Trim + fall back to the public URL: a stray space when pasting env vars
+  // into a hosting dashboard otherwise makes supabase-js throw
+  // "Invalid supabaseUrl: Provided URL is malformed."
+  const SUPABASE_URL =
+    validUrl(cleanEnv(process.env.SUPABASE_URL)) ||
+    validUrl(cleanEnv(process.env.VITE_SUPABASE_URL));
+  const SUPABASE_SERVICE_ROLE_KEY = cleanEnv(process.env.SUPABASE_SERVICE_ROLE_KEY);
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     const missing = [

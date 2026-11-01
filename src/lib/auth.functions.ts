@@ -34,9 +34,11 @@ export const signInWithUsername = createServerFn({ method: "POST" })
       .ilike("username", data.username)
       .maybeSingle();
 
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+    const supabaseUrl =
+      process.env.SUPABASE_URL?.trim() || process.env.VITE_SUPABASE_URL?.trim();
     const publishableKey =
-      process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      process.env.SUPABASE_PUBLISHABLE_KEY?.trim() ||
+      process.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim();
     if (!supabaseUrl || !publishableKey || !profile?.email)
       throw new Error("Invalid username or password.");
 

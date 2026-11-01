@@ -33,8 +33,26 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 
 export const requireSupabaseAuth = createMiddleware({ type: "function" }).server(
   async ({ next }) => {
-    const SUPABASE_URL = process.env.SUPABASE_URL;
-    const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
+    // Trim + validated public-URL fallback: dashboard-pasted env vars can
+    // carry stray spaces, which supabase-js rejects as a malformed URL.
+    const rawUrl = process.env.SUPABASE_URL?.trim() || process.env.VITE_SUPABASE_URL?.trim();
+    let SUPABASE_URL: string | undefined;
+    try {
+      if (rawUrl && new URL(rawUrl).protocol.startsWith("http")) SUPABASE_URL = rawUrl;
+    } catch {
+      SUPABASE_URL = undefined;
+    }
+    if (!SUPABASE_URL) {
+      const fallback = process.env.VITE_SUPABASE_URL?.trim();
+      try {
+        if (fallback && new URL(fallback).protocol.startsWith("http")) SUPABASE_URL = fallback;
+      } catch {
+        /* leave undefined; the missing-var error below explains the fix */
+      }
+    }
+    const SUPABASE_PUBLISHABLE_KEY =
+      process.env.SUPABASE_PUBLISHABLE_KEY?.trim() ||
+      process.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim();
 
     if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
       const missing = [
