@@ -29,12 +29,47 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
   };
 }
 
+function firstValidUrl(...candidates: (string | undefined)[]): string | undefined {
+  for (const candidate of candidates) {
+    const value = candidate?.trim();
+    if (!value) continue;
+    try {
+      const parsed = new URL(value);
+      if (parsed.protocol === "http:" || parsed.protocol === "https:") return value;
+    } catch {
+      // Malformed value (e.g. stray space from a dashboard paste) — try next.
+    }
+  }
+  return undefined;
+}
+
+function firstValue(...candidates: (string | undefined)[]): string | undefined {
+  for (const candidate of candidates) {
+    const value = candidate?.trim();
+    if (value) return value;
+  }
+  return undefined;
+}
+
+function runtimeEnv(name: string): string | undefined {
+  return typeof process !== "undefined" ? process.env?.[name] : undefined;
+}
+
 function createSupabaseClient() {
   // Use import.meta.env for client-side (Vite build-time replacement)
-  // Fall back to process.env for SSR (server-side rendering)
-  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-  const SUPABASE_PUBLISHABLE_KEY =
-    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
+  // Fall back to process.env for SSR (server-side rendering).
+  // Values are trimmed and URL-validated: a malformed dashboard-pasted value
+  // must not take the whole client down when a valid fallback exists.
+  const SUPABASE_URL = firstValidUrl(
+    import.meta.env.VITE_SUPABASE_URL,
+    runtimeEnv("SUPABASE_URL"),
+    runtimeEnv("VITE_SUPABASE_URL"),
+  );
+  const SUPABASE_PUBLISHABLE_KEY = firstValue(
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+    runtimeEnv("SUPABASE_PUBLISHABLE_KEY"),
+    runtimeEnv("VITE_SUPABASE_PUBLISHABLE_KEY"),
+  );
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     const missing = [
