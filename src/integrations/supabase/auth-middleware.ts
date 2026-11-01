@@ -3,6 +3,7 @@ import { createMiddleware } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
+import { FALLBACK_SUPABASE_URL } from "@/lib/supabase-url";
 
 function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
@@ -42,14 +43,7 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
     } catch {
       SUPABASE_URL = undefined;
     }
-    if (!SUPABASE_URL) {
-      const fallback = process.env.VITE_SUPABASE_URL?.trim();
-      try {
-        if (fallback && new URL(fallback).protocol.startsWith("http")) SUPABASE_URL = fallback;
-      } catch {
-        /* leave undefined; the missing-var error below explains the fix */
-      }
-    }
+    if (!SUPABASE_URL) SUPABASE_URL = FALLBACK_SUPABASE_URL;
     const SUPABASE_PUBLISHABLE_KEY =
       process.env.SUPABASE_PUBLISHABLE_KEY?.trim() ||
       process.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim();

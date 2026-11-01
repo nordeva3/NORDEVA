@@ -4,6 +4,7 @@
 // For user-authenticated queries (with RLS), use the auth middleware instead.
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
+import { FALLBACK_SUPABASE_URL } from "@/lib/supabase-url";
 
 function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
@@ -53,7 +54,8 @@ function createSupabaseAdminClient() {
   // "Invalid supabaseUrl: Provided URL is malformed."
   const SUPABASE_URL =
     validUrl(cleanEnv(process.env.SUPABASE_URL)) ||
-    validUrl(cleanEnv(process.env.VITE_SUPABASE_URL));
+    validUrl(cleanEnv(process.env.VITE_SUPABASE_URL)) ||
+    FALLBACK_SUPABASE_URL;
   const SUPABASE_SERVICE_ROLE_KEY = cleanEnv(process.env.SUPABASE_SERVICE_ROLE_KEY);
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
