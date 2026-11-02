@@ -35,10 +35,10 @@ export const signInWithUsername = createServerFn({ method: "POST" })
       .maybeSingle();
 
     const supabaseUrl =
-      process.env.SUPABASE_URL?.trim() || process.env.VITE_SUPABASE_URL?.trim();
+      process.env.SUPABASE_URL?.replace(/\s+/g, "") || process.env.VITE_SUPABASE_URL?.replace(/\s+/g, "");
     const publishableKey =
-      process.env.SUPABASE_PUBLISHABLE_KEY?.trim() ||
-      process.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim();
+      process.env.SUPABASE_PUBLISHABLE_KEY?.replace(/\s+/g, "") ||
+      process.env.VITE_SUPABASE_PUBLISHABLE_KEY?.replace(/\s+/g, "");
     if (!supabaseUrl || !publishableKey || !profile?.email)
       throw new Error("Invalid username or password.");
 

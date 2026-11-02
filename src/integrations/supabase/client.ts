@@ -32,7 +32,7 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 
 function firstValidUrl(...candidates: (string | undefined)[]): string | undefined {
   for (const candidate of candidates) {
-    const value = candidate?.trim();
+    const value = candidate?.replace(/\s+/g, "");
     if (!value) continue;
     try {
       const parsed = new URL(value);
@@ -46,7 +46,7 @@ function firstValidUrl(...candidates: (string | undefined)[]): string | undefine
 
 function firstValue(...candidates: (string | undefined)[]): string | undefined {
   for (const candidate of candidates) {
-    const value = candidate?.trim();
+    const value = candidate?.replace(/\s+/g, "");
     if (value) return value;
   }
   return undefined;

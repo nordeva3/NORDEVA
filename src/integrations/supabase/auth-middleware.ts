@@ -36,7 +36,7 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
   async ({ next }) => {
     // Trim + validated public-URL fallback: dashboard-pasted env vars can
     // carry stray spaces, which supabase-js rejects as a malformed URL.
-    const rawUrl = process.env.SUPABASE_URL?.trim() || process.env.VITE_SUPABASE_URL?.trim();
+    const rawUrl = process.env.SUPABASE_URL?.replace(/\s+/g, "") || process.env.VITE_SUPABASE_URL?.replace(/\s+/g, "");
     let SUPABASE_URL: string | undefined;
     try {
       if (rawUrl && new URL(rawUrl).protocol.startsWith("http")) SUPABASE_URL = rawUrl;
@@ -45,8 +45,8 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
     }
     if (!SUPABASE_URL) SUPABASE_URL = FALLBACK_SUPABASE_URL;
     const SUPABASE_PUBLISHABLE_KEY =
-      process.env.SUPABASE_PUBLISHABLE_KEY?.trim() ||
-      process.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim();
+      process.env.SUPABASE_PUBLISHABLE_KEY?.replace(/\s+/g, "") ||
+      process.env.VITE_SUPABASE_PUBLISHABLE_KEY?.replace(/\s+/g, "");
 
     if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
       const missing = [

@@ -34,7 +34,7 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 }
 
 function cleanEnv(value: string | undefined): string | undefined {
-  const cleaned = value?.trim();
+  const cleaned = value?.replace(/\s+/g, "");
   return cleaned ? cleaned : undefined;
 }
 
