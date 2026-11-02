@@ -92,7 +92,6 @@ function validateSafeFileName(name: string) {
     name.includes("\\")
   )
     return "File name contains unsupported characters.";
-  return "File name contains unsupported characters.";
   return null;
 }
 
