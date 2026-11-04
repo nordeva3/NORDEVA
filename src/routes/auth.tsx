@@ -223,7 +223,12 @@ function AuthPage() {
       callback.searchParams.set("next", targetPath);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: callback.toString() },
+        options: {
+          redirectTo: callback.toString(),
+          // Always show Google's account chooser instead of silently
+          // reusing whichever Google session the browser already has.
+          queryParams: { prompt: "select_account" },
+        },
       });
       if (error) throw error;
       // Supabase redirects the browser to Google and back to /auth.
