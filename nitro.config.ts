@@ -9,3 +9,6 @@ export default defineConfig({
     nodeCompat: true,
   },
 });
+
+// Redeploy note (2026-11-06): each production build picks up the dashboard-managed
+// secrets (Supabase + Stripe test keys) saved on the Pages project.
