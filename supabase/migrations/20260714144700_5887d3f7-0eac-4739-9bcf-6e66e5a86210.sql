@@ -81,3 +81,6 @@ REVOKE ALL ON FUNCTION public.validate_profile_username() FROM PUBLIC, anon, aut
 -- but revoke direct RPC access from anon; keep authenticated so app can check its own role via RPC if needed.
 REVOKE ALL ON FUNCTION public.has_role(uuid, app_role) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.has_role(uuid, app_role) TO authenticated, anon;
+
+-- QA fix (2026-11-02): 20260714144724 ne has_role ki execute ijaazat sabse chheen li thi; seller uploads band ho gaye the. Anon pehle theek hua, ye baaki roles ke liye hai.
+GRANT EXECUTE ON FUNCTION public.has_role(uuid, app_role) TO authenticated, service_role;

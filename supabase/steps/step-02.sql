@@ -553,3 +553,6 @@ REVOKE INSERT ON public.orders FROM anon, authenticated;
 DROP POLICY IF EXISTS "anyone can create order" ON public.orders;
 DROP POLICY IF EXISTS "buyers create own or anon orders" ON public.orders;
 GRANT INSERT ON public.orders TO service_role;
+
+-- QA fix (2026-11-02): 20260714144724 ne has_role ki execute ijaazat sabse chheen li thi; seller uploads band ho gaye the. Anon pehle theek hua, ye baaki roles ke liye hai.
+GRANT EXECUTE ON FUNCTION public.has_role(uuid, app_role) TO authenticated, service_role;
