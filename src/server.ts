@@ -238,98 +238,28 @@ export default {
         const workerSecret = process.env.WORKER_SECRET;
         if (!workerSecret || request.headers.get("x-worker-secret") !== workerSecret)
           return Response.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-        const providerUrl = process.env.MALWARE_SCANNER_URL;
-        const providerToken = process.env.MALWARE_SCANNER_TOKEN;
-        if (!providerUrl || !providerToken)
+        try {
+          const { runMalwareScanBatch } = await import("./lib/malware-worker.server");
+          const batch = await runMalwareScanBatch(10);
+          if (!batch.configured)
+            return Response.json(
+              { ok: false, error: "Malware scanner not configured" },
+              { status: 503 },
+            );
+          return Response.json({
+            ok: true,
+            clean: batch.clean,
+            warning: batch.warning,
+            incomplete: batch.incomplete,
+            infected: batch.infected,
+            failed: batch.failed,
+          });
+        } catch (e) {
           return Response.json(
-            { ok: false, error: "Malware scanner not configured" },
-            { status: 503 },
+            { ok: false, error: e instanceof Error ? e.message : "Worker error" },
+            { status: 500 },
           );
-        const { supabaseAdmin } = await import("./integrations/supabase/client.server");
-        const { data: jobs, error } = await supabaseAdmin
-          .from("malware_scans")
-          .select("id,listing_id,asset_id,scanner,scanner_version,status")
-          .eq("status", "queued")
-          .order("scanned_at", { ascending: true })
-          .limit(10);
-        if (error) return Response.json({ ok: false, error: error.message }, { status: 500 });
-        let clean = 0,
-          infected = 0,
-          failed = 0;
-        for (const job of jobs ?? []) {
-          try {
-            if (!job.asset_id || !job.listing_id)
-              throw new Error("Scan job is missing its asset or listing reference");
-            const { data: asset } = await supabaseAdmin
-              .from("listing_assets")
-              .select("storage_path,file_name,mime_type,file_size,checksum_sha256")
-              .eq("id", job.asset_id)
-              .single();
-            if (!asset) throw new Error("Asset not found");
-            const r = await fetch(providerUrl, {
-              method: "POST",
-              headers: {
-                "content-type": "application/json",
-                authorization: `Bearer ${providerToken}`,
-              },
-              body: JSON.stringify({
-                listing_id: job.listing_id,
-                asset_id: job.asset_id,
-                path: asset.storage_path,
-                file_name: asset.file_name,
-                mime_type: asset.mime_type,
-                file_size: asset.file_size,
-                sha256: asset.checksum_sha256,
-              }),
-            });
-            const body = await r.text();
-            let result: any = {};
-            try {
-              result = body ? JSON.parse(body) : {};
-            } catch {
-              /* non-JSON scanner response: treat as empty */
-            }
-            if (!r.ok) throw new Error(result?.error || `Scanner returned ${r.status}`);
-            const status =
-              result.status === "infected"
-                ? "infected"
-                : result.status === "clean"
-                  ? "clean"
-                  : "error";
-            await supabaseAdmin
-              .from("malware_scans")
-              .update({
-                status,
-                scanner_version: result.scanner_version ?? job.scanner_version,
-                signature: result.signature ?? null,
-                findings: result.findings ?? null,
-                scanned_at: new Date().toISOString(),
-              })
-              .eq("id", job.id);
-            if (status === "infected") {
-              await supabaseAdmin
-                .from("listings")
-                .update({
-                  status: "rejected",
-                  review_note: "Automated malware scanner flagged a downloadable asset.",
-                })
-                .eq("id", job.listing_id);
-              infected++;
-            } else if (status === "clean") clean++;
-            else failed++;
-          } catch (e) {
-            await supabaseAdmin
-              .from("malware_scans")
-              .update({
-                status: "error",
-                findings: { error: e instanceof Error ? e.message : "Scanner error" },
-                scanned_at: new Date().toISOString(),
-              })
-              .eq("id", job.id);
-            failed++;
-          }
         }
-        return Response.json({ ok: true, clean, infected, failed });
       }
 
       if (url.pathname === "/api/razorpay-webhook" && request.method === "POST") {

@@ -1279,6 +1279,61 @@ export type Database = {
           },
         ];
       };
+      security_events: {
+        Row: {
+          actor_id: string | null;
+          asset_id: string | null;
+          created_at: string;
+          detail: Json;
+          event_type: string;
+          id: string;
+          listing_id: string | null;
+          scan_id: string | null;
+        };
+        Insert: {
+          actor_id?: string | null;
+          asset_id?: string | null;
+          created_at?: string;
+          detail?: Json;
+          event_type: string;
+          id?: string;
+          listing_id?: string | null;
+          scan_id?: string | null;
+        };
+        Update: {
+          actor_id?: string | null;
+          asset_id?: string | null;
+          created_at?: string;
+          detail?: Json;
+          event_type?: string;
+          id?: string;
+          listing_id?: string | null;
+          scan_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "security_events_asset_id_fkey";
+            columns: ["asset_id"];
+            isOneToOne: false;
+            referencedRelation: "listing_assets";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "security_events_listing_id_fkey";
+            columns: ["listing_id"];
+            isOneToOne: false;
+            referencedRelation: "listings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "security_events_scan_id_fkey";
+            columns: ["scan_id"];
+            isOneToOne: false;
+            referencedRelation: "malware_scans";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       messages: {
         Row: {
           body: string;
@@ -3221,6 +3276,19 @@ export type Database = {
         Returns: boolean;
       };
       queue_listing_scans: {
+        Args: {
+          p_listing_id: string;
+        };
+        Returns: number;
+      };
+      admin_override_scan: {
+        Args: {
+          p_note?: string;
+          p_scan_id: string;
+        };
+        Returns: string;
+      };
+      admin_rescan_listing: {
         Args: {
           p_listing_id: string;
         };

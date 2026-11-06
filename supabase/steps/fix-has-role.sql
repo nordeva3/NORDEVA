@@ -4,3 +4,4 @@
 -- Categories dikhne me error aata hai.
 -- ============================================================
 GRANT EXECUTE ON FUNCTION public.has_role(uuid, app_role) TO anon;
+GRANT EXECUTE ON FUNCTION public.has_role(uuid, app_role) TO authenticated, service_role;

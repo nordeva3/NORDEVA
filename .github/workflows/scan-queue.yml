@@ -1,0 +1,29 @@
+name: Malware scan queue
+
+# Drains the NORDEVA Shield scan queue: warms the (free-tier, sleep-prone)
+# scanner service first, then asks the site worker to process queued scans.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  drain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Warm up the scanner service
+        run: |
+          for i in 1 2 3 4 5 6; do
+            if curl -sS --max-time 20 https://nordeva-shield.onrender.com/health; then
+              echo "scanner is awake"
+              break
+            fi
+            echo "waiting for scanner to wake..."
+            sleep 15
+          done
+      - name: Process queued scans
+        run: |
+          curl -sS -X POST "https://nordeva.pages.dev/api/worker/malware" \
+            -H "x-worker-secret: ${{ secrets.WORKER_SECRET }}" \
+            --max-time 300
+          echo

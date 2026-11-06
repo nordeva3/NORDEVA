@@ -81,6 +81,7 @@ import {
   adminResolveDispute,
 } from "@/lib/admin-v2.functions";
 import { resolveReport } from "@/lib/admin.functions";
+import { runScanQueueNow } from "@/lib/security.functions";
 import { getAppearance, saveAppearance } from "@/lib/appearance.functions";
 import {
   APPEARANCE_PRESETS,
@@ -110,6 +111,7 @@ type AdminData = Awaited<ReturnType<typeof getAdminCommandCenter>>;
 const nav = [
   ["overview", "Overview", LayoutDashboard],
   ["moderation", "Moderation", PackageCheck],
+  ["security", "Security", ShieldAlert],
   ["orders", "Orders & money", CircleDollarSign],
   ["projects", "Projects", Briefcase],
   ["sellers", "Sellers & KYC", ShieldCheck],
@@ -363,6 +365,9 @@ function AdminPage() {
                   act={act}
                   updateListing={updateListing}
                 />
+              </TabsContent>
+              <TabsContent value="security">
+                <SecurityPanel listings={d.listings} updateListing={updateListing} />
               </TabsContent>
               <TabsContent value="orders">
                 <Orders orders={d.orders} />
@@ -665,6 +670,356 @@ function Moderation({
           ))
         )}
       </div>
+    </Panel>
+  );
+}
+const SHIELD_RULES_VERSION = "1.0.0";
+
+type ScanRow = {
+  id: string;
+  listing_id: string | null;
+  asset_id: string | null;
+  scanner: string;
+  scanner_version: string | null;
+  status: string;
+  signature: string | null;
+  findings: any;
+  scanned_at: string;
+};
+
+function verdictOf(rows: ScanRow[]): { label: string; cls: string } {
+  const s = rows.map((r) => r.status);
+  if (s.includes("infected"))
+    return { label: "DANGEROUS", cls: "bg-red-500/15 text-red-500" };
+  if (s.some((x) => x === "incomplete" || x === "error"))
+    return { label: "INCOMPLETE", cls: "bg-zinc-500/15 text-zinc-400" };
+  if (s.includes("warning")) return { label: "WARNING", cls: "bg-amber-500/15 text-amber-500" };
+  if (s.length > 0 && s.every((x) => x === "clean" || x === "overridden"))
+    return {
+      label: s.includes("overridden") ? "SAFE · REVIEWED" : "SAFE",
+      cls: "bg-emerald-500/15 text-emerald-500",
+    };
+  return { label: "QUEUED", cls: "bg-sky-500/15 text-sky-500" };
+}
+
+const SEVERITY_CLS: Record<string, string> = {
+  critical: "bg-red-500/15 text-red-500",
+  high: "bg-orange-500/15 text-orange-500",
+  medium: "bg-amber-500/15 text-amber-500",
+  low: "bg-zinc-500/15 text-zinc-400",
+  info: "bg-zinc-500/10 text-zinc-500",
+};
+
+function SecurityPanel({
+  listings,
+  updateListing,
+}: {
+  listings: any[];
+  updateListing: any;
+}) {
+  const runQueue = useServerFn(runScanQueueNow);
+  const [scans, setScans] = useState<ScanRow[]>([]);
+  const [loadingScans, setLoadingScans] = useState(true);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [queueNote, setQueueNote] = useState<string | null>(null);
+
+  const loadScans = async () => {
+    setLoadingScans(true);
+    const { data, error } = await supabase
+      .from("malware_scans")
+      .select(
+        "id,listing_id,asset_id,scanner,scanner_version,status,signature,findings,scanned_at",
+      )
+      .order("scanned_at", { ascending: false })
+      .limit(300);
+    if (error) toast.error(error.message);
+    else setScans((data ?? []) as ScanRow[]);
+    setLoadingScans(false);
+  };
+  useEffect(() => {
+    void loadScans();
+  }, []);
+
+  // Latest scan per (listing, asset); rows arrive newest-first.
+  const byListing = new Map<string, Map<string, ScanRow>>();
+  for (const row of scans) {
+    if (!row.listing_id || !row.asset_id) continue;
+    if (!byListing.has(row.listing_id)) byListing.set(row.listing_id, new Map());
+    const perAsset = byListing.get(row.listing_id)!;
+    if (!perAsset.has(row.asset_id)) perAsset.set(row.asset_id, row);
+  }
+  const listingById = new Map(listings.map((l: any) => [l.id, l]));
+  const groups = [...byListing.entries()]
+    .map(([listingId, perAsset]) => ({
+      listingId,
+      listing: listingById.get(listingId),
+      rows: [...perAsset.values()],
+    }))
+    .sort((a, b) => {
+      const rank = (rows: ScanRow[]) =>
+        rows.some((r) => r.status === "infected")
+          ? 0
+          : rows.some((r) => ["warning", "incomplete", "error"].includes(r.status))
+            ? 1
+            : 2;
+      return rank(a.rows) - rank(b.rows);
+    });
+
+  const doBusy = async (key: string, fn: () => Promise<unknown>, ok: string) => {
+    setBusy(key);
+    try {
+      await fn();
+      toast.success(ok);
+      await loadScans();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Action failed");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <Panel title="Security scans — NORDEVA Shield" icon={<ShieldAlert />} count={groups.length}>
+      <div className="flex flex-wrap items-center gap-2 border-b border-border/60 p-4">
+        <Button
+          size="sm"
+          disabled={busy === "queue"}
+          onClick={() =>
+            doBusy(
+              "queue",
+              async () => {
+                const r: any = await runQueue({ data: {} });
+                setQueueNote(
+                  !r?.configured
+                    ? "Scanner service is not configured yet (MALWARE_SCANNER_URL / TOKEN missing)."
+                    : `Queue processed — clean ${r.clean}, warning ${r.warning}, incomplete ${r.incomplete}, dangerous ${r.infected}, failed ${r.failed}.`,
+                );
+              },
+              "Scan queue processed",
+            )
+          }
+        >
+          <RefreshCw /> Run scan queue now
+        </Button>
+        <Button size="sm" variant="outline" disabled={loadingScans} onClick={() => void loadScans()}>
+          Refresh
+        </Button>
+        {queueNote && <span className="text-xs text-muted-foreground">{queueNote}</span>}
+        <span className="ml-auto text-xs text-muted-foreground">
+          Dangerous products are blocked and rejected automatically. Warning / incomplete scans
+          hold publication until an admin reviews and overrides.
+        </span>
+      </div>
+      {loadingScans ? (
+        <Empty text="Loading scans…" />
+      ) : groups.length === 0 ? (
+        <Empty text="No scans yet. Scans are queued automatically when a seller uploads delivery files." />
+      ) : (
+        <div className="divide-y divide-border/40">
+          {groups.map(({ listingId, listing, rows }) => {
+            const verdict = verdictOf(rows);
+            const filesTotal = rows.reduce(
+              (n, r) => n + (Number(r.findings?.coverage?.files_total) || 0),
+              0,
+            );
+            const filesInspected = rows.reduce(
+              (n, r) => n + (Number(r.findings?.coverage?.files_inspected) || 0),
+              0,
+            );
+            const suspiciousFiles = new Set<string>();
+            for (const r of rows)
+              for (const f of r.findings?.findings ?? [])
+                if (f?.file && ["critical", "high", "medium"].includes(f.severity))
+                  suspiciousFiles.add(f.file);
+            const stale = rows.some(
+              (r) =>
+                ["clean", "warning", "infected", "incomplete"].includes(r.status) &&
+                r.scanner_version !== SHIELD_RULES_VERSION,
+            );
+            const seller =
+              listing?.public_profiles?.display_name ||
+              listing?.public_profiles?.username ||
+              (listing?.seller_id ? `${String(listing.seller_id).slice(0, 8)}…` : "—");
+            const isOpen = expanded === listingId;
+            return (
+              <div key={listingId} className="p-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span
+                    className={`rounded px-2 py-0.5 text-[10px] font-bold tracking-wide ${verdict.cls}`}
+                  >
+                    {verdict.label}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium">
+                      {listing?.title || `Listing ${listingId.slice(0, 8)}…`}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Seller {seller} · Listing status: {listing?.status ?? "unknown"} · Files
+                      inspected {filesInspected}/{filesTotal} across {rows.length} asset
+                      {rows.length === 1 ? "" : "s"}
+                      {suspiciousFiles.size > 0
+                        ? ` · ${suspiciousFiles.size} suspicious file${suspiciousFiles.size === 1 ? "" : "s"}`
+                        : ""}
+                      {stale ? " · Old scan rules — re-scan advised" : ""}
+                    </div>
+                  </div>
+                  <div className="ml-auto flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setExpanded(isOpen ? null : listingId)}
+                    >
+                      {isOpen ? "Hide findings" : "Findings"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={busy === `rescan-${listingId}`}
+                      onClick={() =>
+                        doBusy(
+                          `rescan-${listingId}`,
+                          async () => {
+                            const { error } = await supabase.rpc("admin_rescan_listing", {
+                              p_listing_id: listingId,
+                            });
+                            if (error) throw new Error(error.message);
+                          },
+                          "Re-scan queued",
+                        )
+                      }
+                    >
+                      Re-scan
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={busy === `reject-${listingId}`}
+                      onClick={() =>
+                        doBusy(
+                          `reject-${listingId}`,
+                          () =>
+                            updateListing({
+                              data: {
+                                listing_id: listingId,
+                                status: "rejected",
+                                review_note: "Rejected after security review.",
+                              },
+                            }),
+                          "Product rejected",
+                        )
+                      }
+                    >
+                      <X /> Reject
+                    </Button>
+                  </div>
+                </div>
+                {isOpen && (
+                  <div className="mt-3 space-y-3">
+                    {rows.map((r) => {
+                      const f = r.findings ?? {};
+                      const items: any[] = Array.isArray(f.findings) ? f.findings : [];
+                      const hold = ["warning", "incomplete", "error"].includes(r.status);
+                      return (
+                        <div
+                          key={r.id}
+                          className="rounded-md border border-border/50 bg-muted/20 p-3"
+                        >
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                            <span className="font-mono">asset {r.asset_id?.slice(0, 8)}…</span>
+                            <span>
+                              status <b className="text-foreground">{r.status}</b>
+                            </span>
+                            <span>rules {r.scanner_version ?? "legacy"}</span>
+                            <span>{new Date(r.scanned_at).toLocaleString()}</span>
+                            {r.signature && (
+                              <span className="font-mono text-red-400">{r.signature}</span>
+                            )}
+                            {f.layers && (
+                              <span>
+                                layers: static {f.layers.static?.status ?? "?"}, signatures{" "}
+                                {f.layers.signatures?.status ?? "?"}, dependencies{" "}
+                                {f.layers.dependencies?.status ?? "?"}, sandbox{" "}
+                                {f.layers.sandbox?.status ?? "?"}
+                              </span>
+                            )}
+                            {hold && (
+                              <Button
+                                size="sm"
+                                className="ml-auto"
+                                disabled={busy === `override-${r.id}`}
+                                onClick={() =>
+                                  doBusy(
+                                    `override-${r.id}`,
+                                    async () => {
+                                      const note =
+                                        window.prompt(
+                                          "Override note (why is this safe to publish?)",
+                                          "",
+                                        ) || "";
+                                      const { error } = await supabase.rpc("admin_override_scan", {
+                                        p_scan_id: r.id,
+                                        p_note: note,
+                                      });
+                                      if (error) throw new Error(error.message);
+                                    },
+                                    "Hold overridden — listing can now be approved from Moderation",
+                                  )
+                                }
+                              >
+                                <Check /> Override hold
+                              </Button>
+                            )}
+                          </div>
+                          {f.admin_override && (
+                            <div className="mt-1 text-xs text-emerald-500">
+                              Reviewed by admin: {f.admin_override.note || "no note"} (
+                              {new Date(f.admin_override.at).toLocaleString()})
+                            </div>
+                          )}
+                          {Array.isArray(f.limits_hit) && f.limits_hit.length > 0 && (
+                            <div className="mt-1 text-xs text-amber-500">
+                              Limits hit: {f.limits_hit.join(", ")}
+                            </div>
+                          )}
+                          {items.length === 0 ? (
+                            <div className="mt-2 text-xs text-muted-foreground">
+                              No findings recorded for this asset.
+                            </div>
+                          ) : (
+                            <ul className="mt-2 space-y-1">
+                              {items.slice(0, 50).map((it, i) => (
+                                <li key={i} className="flex flex-wrap items-baseline gap-2 text-xs">
+                                  <span
+                                    className={`rounded px-1.5 py-px text-[10px] font-semibold uppercase ${SEVERITY_CLS[it.severity] ?? SEVERITY_CLS.info}`}
+                                  >
+                                    {it.severity}
+                                  </span>
+                                  <span className="font-mono text-[11px]">{it.rule_id}</span>
+                                  <span className="font-mono text-[11px] text-muted-foreground">
+                                    {it.file ?? ""}
+                                    {it.line ? `:${it.line}` : ""}
+                                  </span>
+                                  <span>{it.message}</span>
+                                </li>
+                              ))}
+                              {items.length > 50 && (
+                                <li className="text-xs text-muted-foreground">
+                                  …and {items.length - 50} more findings
+                                </li>
+                              )}
+                            </ul>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </Panel>
   );
 }
