@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { FALLBACK_SUPABASE_URL, FALLBACK_SUPABASE_PUBLISHABLE_KEY } from "@/lib/supabase-url";
 import { TopNav } from "@/components/top-nav";
 import {
   CheckCircle2,
@@ -24,7 +25,8 @@ function LaunchPage() {
     (async () => {
       const env = await Promise.resolve({
         supabase: Boolean(
-          import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          (import.meta.env.VITE_SUPABASE_URL || FALLBACK_SUPABASE_URL) &&
+            (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || FALLBACK_SUPABASE_PUBLISHABLE_KEY),
         ),
         appUrl: Boolean(import.meta.env.VITE_APP_URL),
       });

@@ -3,7 +3,7 @@ import { createMiddleware } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
-import { FALLBACK_SUPABASE_URL } from "@/lib/supabase-url";
+import { FALLBACK_SUPABASE_URL, FALLBACK_SUPABASE_PUBLISHABLE_KEY } from "@/lib/supabase-url";
 
 function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
@@ -46,7 +46,8 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
     if (!SUPABASE_URL) SUPABASE_URL = FALLBACK_SUPABASE_URL;
     const SUPABASE_PUBLISHABLE_KEY =
       process.env.SUPABASE_PUBLISHABLE_KEY?.replace(/\s+/g, "") ||
-      process.env.VITE_SUPABASE_PUBLISHABLE_KEY?.replace(/\s+/g, "");
+      process.env.VITE_SUPABASE_PUBLISHABLE_KEY?.replace(/\s+/g, "") ||
+      FALLBACK_SUPABASE_PUBLISHABLE_KEY;
 
     if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
       const missing = [

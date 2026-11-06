@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { FALLBACK_SUPABASE_URL, FALLBACK_SUPABASE_PUBLISHABLE_KEY } from "@/lib/supabase-url";
 
 const USERNAME_RE = /^[A-Za-z0-9_]{3,20}$/;
 
@@ -35,10 +36,13 @@ export const signInWithUsername = createServerFn({ method: "POST" })
       .maybeSingle();
 
     const supabaseUrl =
-      process.env.SUPABASE_URL?.replace(/\s+/g, "") || process.env.VITE_SUPABASE_URL?.replace(/\s+/g, "");
+      process.env.SUPABASE_URL?.replace(/\s+/g, "") ||
+      process.env.VITE_SUPABASE_URL?.replace(/\s+/g, "") ||
+      FALLBACK_SUPABASE_URL;
     const publishableKey =
       process.env.SUPABASE_PUBLISHABLE_KEY?.replace(/\s+/g, "") ||
-      process.env.VITE_SUPABASE_PUBLISHABLE_KEY?.replace(/\s+/g, "");
+      process.env.VITE_SUPABASE_PUBLISHABLE_KEY?.replace(/\s+/g, "") ||
+      FALLBACK_SUPABASE_PUBLISHABLE_KEY;
     if (!supabaseUrl || !publishableKey || !profile?.email)
       throw new Error("Invalid username or password.");
 
